@@ -1,0 +1,16 @@
+{
+  "name": "stripe-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^2.1.7",
+    "@types/stripe": "^8.0.417",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "stripe": "^13.9.0"
+  }
+}
