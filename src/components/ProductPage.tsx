@@ -1,7 +1,12 @@
 import {useState, useEffect} from 'react';
 import {Button, Image, Text, TextInput, View, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {usePaymentSheet} from '@stripe/stripe-react-native';
+import {
+  usePaymentSheet,
+  usePlatformPay,
+  PlatformPayButton,
+  PlatformPay,
+} from '@stripe/stripe-react-native';
 
 import {Product} from '../types';
 import API from '../api';
@@ -52,7 +57,15 @@ const styles = StyleSheet.create({
 export function ProductPage({product}: ProductPageProps) {
   const navigation = useNavigation();
   const [ready, setReady] = useState(false);
+  const [intent, setIntent] = useState(null);
   const [amount, setAmount] = useState(1);
+  const [canPlayformPay, setCanPlatformPay] = useState(false);
+
+  const {
+    isPlatformPaySupported,
+    confirmPlatformPayPayment,
+    confirmPlatformPaySetupIntent,
+  } = usePlatformPay();
 
   const {
     initPaymentSheet,
@@ -62,9 +75,19 @@ export function ProductPage({product}: ProductPageProps) {
   } = usePaymentSheet();
 
   useEffect(() => {
+    if (amount <= 0) {
+      return;
+    }
+
     (async () => {
+      setCanPlatformPay(
+        await isPlatformPaySupported({
+          googlePay: {testEnv: true},
+        }),
+      );
+
       const intent = await API.setupPayment(product, amount);
-      //   console.log({intent});
+      setIntent(intent);
 
       const {error} = await initPaymentSheet({
         merchantDisplayName: 'TEST',
@@ -76,8 +99,6 @@ export function ProductPage({product}: ProductPageProps) {
           currencyCode: 'usd',
         },
       });
-
-      //   console.log({error});
 
       if (!error) {
         setReady(true);
